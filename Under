@@ -1,0 +1,63 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>UnderCover</title><style>body{margin:0;font-family:Arial;background:#f0f2f5}.nav{background:#1877f2;color:#fff;padding:15px;text-align:center;font-size:22px;font-weight:bold}.box{max-width:500px;margin:40px auto;background:#fff;padding:25px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.1)}input,textarea{width:100%;padding:10px;margin:10px 0;border:1px solid #ddd;border-radius:5px}button{width:100%;padding:12px;border:none;border-radius:5px;background:#1877f2;color:#fff;font-weight:bold;cursor:pointer}.green{background:#42b72a}.red{background:#e74c3c}.post{background:#f9f9f9;padding:15px;margin:15px 0;border-radius:5px}small{color:#777}</style></head><body><div id="app"></div><script>
+let users=JSON.parse(localStorage.getItem("uc_users"))||[];
+let posts=JSON.parse(localStorage.getItem("uc_posts"))||[];
+let currentUser=localStorage.getItem("uc_currentUser");
+
+function save(){localStorage.setItem("uc_users",JSON.stringify(users));localStorage.setItem("uc_posts",JSON.stringify(posts));localStorage.setItem("uc_currentUser",currentUser||"");}
+
+function render(){
+document.getElementById("app").innerHTML=currentUser?
+`<div class="nav">UnderCover</div>
+<div class="box">
+<h3>Welcome, ${currentUser}</h3>
+<textarea id="postText" placeholder="What's on your mind?"></textarea>
+<button onclick="addPost()">Post</button>
+${posts.map(p=>`<div class="post"><b>@${p.user}</b><br>${p.text}<br><small>${p.time}</small></div>`).join("")}
+<button class="red" onclick="logout()">Logout</button>
+</div>`
+:
+`<div class="nav">UnderCover</div>
+<div class="box">
+<h3>Login</h3>
+<input id="lu" placeholder="Username">
+<input id="lp" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+<hr>
+<h3>Register</h3>
+<input id="ru" placeholder="Username">
+<input id="rp" type="password" placeholder="Password">
+<button class="green" onclick="register()">Register</button>
+</div>`;
+}
+
+function register(){
+let u=ru.value.trim(),p=rp.value.trim();
+if(!u||!p)return alert("Fill all fields");
+if(users.find(x=>x.u===u))return alert("Username already exists");
+users.push({u,p});
+currentUser=u;
+save();
+render();
+}
+
+function login(){
+let u=lu.value.trim(),p=lp.value.trim();
+let found=users.find(x=>x.u===u&&x.p===p);
+if(!found)return alert("Fake login blocked ❌");
+currentUser=u;
+save();
+render();
+}
+
+function logout(){currentUser=null;save();render();}
+
+function addPost(){
+let t=postText.value.trim();
+if(!t)return;
+posts.unshift({user:currentUser,text:t,time:new Date().toLocaleString()});
+save();
+render();
+}
+
+render();
+</script></body></html>
